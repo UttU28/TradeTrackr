@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-tradeBg text-white;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+@layer components {
+  .card {
+    @apply bg-tradeDark/80 rounded-xl shadow-lg p-4 backdrop-blur-sm;
+  }
+  
+  .btn {
+    @apply px-4 py-2 rounded-lg transition-all duration-200 font-medium;
+  }
+  
+  .btn-primary {
+    @apply btn bg-tradeLight hover:bg-tradeLight/80 text-white;
+  }
+  
+  .btn-secondary {
+    @apply btn border border-tradeLight/30 hover:bg-tradeLight/20 text-white;
+  }
+  
+  .btn-highlight {
+    @apply btn bg-tradeHighlight hover:bg-tradeHighlight/80 text-tradeBg;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.1; }
+}
