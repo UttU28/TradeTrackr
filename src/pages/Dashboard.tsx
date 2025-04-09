@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, BarChart4 } from 'lucide-react';
+import { Plus, BarChart4, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 import Card, { CardHeader, CardContent } from '../components/ui/Card';
 import PerformanceChart from '../components/charts/PerformanceChart';
@@ -9,9 +10,34 @@ import WeekForm from '../components/weeks/WeekForm';
 import TradeForm from '../components/trades/TradeForm';
 import SeedDataButton from '../components/SeedDataButton';
 
+// New component for clickable week cards
+const WeekCardLink: React.FC<{ weekId: string }> = ({ weekId }) => {
+  const navigate = useNavigate();
+  const { setCurrentWeek } = useAppStore();
+  
+  const handleClick = () => {
+    // Scroll to top of the page
+    window.scrollTo({
+      top: 0,
+      behavior: 'instant'
+    });
+    
+    // Set as current week before navigating
+    setCurrentWeek(weekId);
+    
+    // Navigate to the weeks page
+    navigate('/weeks');
+  };
+  
+  return (
+    <div className="cursor-pointer transition-transform hover:scale-[1.02]" onClick={handleClick}>
+      <WeeklySummaryCard weekId={weekId} showTradeStats={false} />
+    </div>
+  );
+};
+
 const Dashboard: React.FC = () => {
-  const { weeks, getCurrentWeek } = useAppStore();
-  const currentWeek = getCurrentWeek();
+  const { weeks } = useAppStore();
   
   const [showWeekForm, setShowWeekForm] = useState<boolean>(false);
   const [showTradeForm, setShowTradeForm] = useState<boolean>(false);
@@ -64,6 +90,15 @@ const Dashboard: React.FC = () => {
             <CardHeader 
               title="Add New Week" 
               description="Create a new trading week to track your trades"
+              action={
+                <button
+                  onClick={() => setShowWeekForm(false)}
+                  className="p-1 rounded-full hover:bg-tradeBg/50 text-white/70 hover:text-white transition-colors"
+                  aria-label="Close form"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              }
             />
             <CardContent>
               <WeekForm onComplete={handleWeekFormComplete} />
@@ -78,6 +113,15 @@ const Dashboard: React.FC = () => {
             <CardHeader 
               title="Add New Trade" 
               description="Record a new trade transaction"
+              action={
+                <button
+                  onClick={() => setShowTradeForm(false)}
+                  className="p-1 rounded-full hover:bg-tradeBg/50 text-white/70 hover:text-white transition-colors"
+                  aria-label="Close form"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              }
             />
             <CardContent>
               <TradeForm onComplete={handleTradeFormComplete} />
@@ -100,32 +144,17 @@ const Dashboard: React.FC = () => {
             </Card>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="md:col-span-1">
-              <StatsCard />
-            </div>
-            
-            <div className="md:col-span-2">
-              {currentWeek && (
-                <Card>
-                  <CardHeader 
-                    title="Current Week"
-                    description="Your active trading week"
-                  />
-                  <CardContent>
-                    <WeeklySummaryCard weekId={currentWeek.id} />
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
+            <StatsCard />
           </div>
           
           {recentWeeks.length > 0 && (
             <div>
               <h2 className="text-xl font-bold text-white mb-4">Recent Weeks</h2>
+              <p className="text-sm text-white/70 mb-4">Click on a week to view its details and trades</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {recentWeeks.map((week) => (
-                  <WeeklySummaryCard key={week.id} weekId={week.id} />
+                  <WeekCardLink key={week.id} weekId={week.id} />
                 ))}
               </div>
             </div>

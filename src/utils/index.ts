@@ -13,12 +13,12 @@ export const formatCurrency = (value: number): string => {
 };
 
 /**
- * Formats a date as MM/DD/YYYY
+ * Formats a date as MMM DD, YYYY (e.g., Jan 15, 2023)
  */
 export const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
+    month: 'short',
+    day: 'numeric',
     year: 'numeric'
   });
 };
@@ -147,4 +147,41 @@ export const downloadFile = (data: string, filename: string, type: string): void
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+/**
+ * Formats a date range for week display
+ * If dates are in the same month: "Jan 1-7, 2023"
+ * If dates span months: "Jan 28 - Feb 3, 2023"
+ * If dates span years: "Dec 30, 2022 - Jan 5, 2023"
+ */
+export const formatDateRange = (startDate: string, endDate: string): string => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  const startMonth = start.getMonth();
+  const endMonth = end.getMonth();
+  const startYear = start.getFullYear();
+  const endYear = end.getFullYear();
+  
+  // Format the day numbers
+  const startDay = start.getDate();
+  const endDay = end.getDate();
+  
+  // Get month names
+  const startMonthName = start.toLocaleDateString('en-US', { month: 'short' });
+  const endMonthName = end.toLocaleDateString('en-US', { month: 'short' });
+  
+  // Same year, same month
+  if (startYear === endYear && startMonth === endMonth) {
+    return `${startMonthName} ${startDay}-${endDay}, ${startYear}`;
+  }
+  
+  // Same year, different months
+  if (startYear === endYear) {
+    return `${startMonthName} ${startDay} - ${endMonthName} ${endDay}, ${startYear}`;
+  }
+  
+  // Different years
+  return `${startMonthName} ${startDay}, ${startYear} - ${endMonthName} ${endDay}, ${endYear}`;
 }; 

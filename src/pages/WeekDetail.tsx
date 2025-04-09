@@ -8,7 +8,7 @@ import TradeList from '../components/trades/TradeList';
 import WeekForm from '../components/weeks/WeekForm';
 import WeeklySummaryCard from '../components/weeks/WeeklySummaryCard';
 import TradeDetailChart from '../components/charts/TradeDetailChart';
-import { formatCurrency, formatDate } from '../utils';
+import { formatCurrency, formatDate, formatDateRange } from '../utils';
 
 interface WeekRatioFormProps {
   weekId: string;
@@ -173,7 +173,7 @@ const WeekDetail: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between mb-8">
         <div className="mr-4 mb-4">
           <p className="text-white/70">
-            {formatDate(week.startDate)} - {formatDate(week.endDate)}
+            {formatDateRange(week.startDate, week.endDate)}
           </p>
           <p className="text-white/70">
             Starting Value: {formatCurrency(week.startValue)}

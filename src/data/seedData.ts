@@ -1,75 +1,102 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Week, Trade } from '../types';
 
-// Get current date for the week
-const now = new Date();
-const startOfWeek = new Date(now);
-startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
-const endOfWeek = new Date(startOfWeek);
-endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
-
-// Format dates to ISO string (YYYY-MM-DD)
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
+const now = new Date();
 
-export const seedWeek: Week = {
-  id: uuidv4(),
-  startDate: formatDate(startOfWeek),
-  endDate: formatDate(endOfWeek),
-  startValue: 3500.00,
-  trades: []
+// Helper to get start and end of a week given a base date
+const getWeekRange = (baseDate: Date) => {
+  const start = new Date(baseDate);
+  start.setDate(start.getDate() - start.getDay() + 1); // Monday
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6); // Sunday
+  return [start, end];
 };
 
-// Trade amounts from the user's data
-export const tradeAmounts = [
-  120.67,
-  256.89,
-  383.16,
-  -125.21,
-  -423.95,
-  156.09,
-  -243.53,
-  -89.29,
-  764.94,
-  476.34,
-  -324.60,
-  239.16,
-  -95.61,
-  -156.57,
-  543.25,
-  -98.56,
-  -45.78,
-  104.89,
-  -345.69,
-  486.54
-];
+// Generate seed weeks
+export const seedWeeks: Week[] = Array.from({ length: 10 }).map((_, i) => {
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - (9 - i) * 7);
+  const [start, end] = getWeekRange(weekStart);
 
-// Create trades with timestamps spread throughout the week
-export const createTradesForWeek = (weekId: string): Trade[] => {
+  // Create fluctuating start values
+  const baseValue = 3500;
+  const fluctuation = (Math.random() - 0.5) * 500;
+  const startValue = baseValue + i * 150 + fluctuation;
+
+  return {
+    id: uuidv4(),
+    startDate: formatDate(start),
+    endDate: formatDate(end),
+    startValue: parseFloat(startValue.toFixed(2)),
+    trades: []
+  };
+});
+
+export const createTradeAmounts = (weekIndex: number): number[] => {
+  const amounts: number[] = [];
+  for (let i = 0; i < 18; i++) {
+    const rand = Math.random();
+    let amount;
+    if (weekIndex < 3) {
+      amount = rand > 0.5 ? rand * 500 : -rand * 150;
+    } else if (weekIndex < 7) {
+      amount = rand > 0.4 ? rand * 400 : -rand * 250;
+    } else {
+      amount = rand > 0.6 ? rand * 300 : -rand * 300;
+    }
+    amounts.push(parseFloat(amount.toFixed(2)));
+  }
+  return amounts;
+};
+
+const getTradeDescription = (amount: number): string => {
+  if (amount > 500) return 'Excellent trade on market momentum';
+  if (amount > 200) return 'Good entry and exit points';
+  if (amount > 100) return 'Solid trade with proper risk management';
+  if (amount > 0) return 'Small win following the trend';
+  if (amount > -100) return 'Small loss, stopped out';
+  if (amount > -200) return 'Loss from unexpected reversal';
+  if (amount > -300) return 'Significant loss due to market shift';
+  return 'Major loss from gap down overnight';
+};
+
+export const createTradesForWeek = (weekId: string, startTime: number, weekIndex: number): Trade[] => {
+  const amounts = createTradeAmounts(weekIndex);
   const trades: Trade[] = [];
-  const startTime = startOfWeek.getTime();
-  const timeSpan = endOfWeek.getTime() - startTime;
-  
-  tradeAmounts.forEach((amount, index) => {
-    // Create somewhat random timestamps throughout the week
-    const timestamp = startTime + (timeSpan * (index / (tradeAmounts.length * 1.2)));
-    
+
+  amounts.forEach((amount, index) => {
+    const dayOffset = Math.min(Math.floor(index / 4), 4);
+    const hourOffset = 9.5 + (index % 4) * 1.5;
+
+    const tradeDate = new Date(startTime);
+    tradeDate.setDate(tradeDate.getDate() + dayOffset);
+    tradeDate.setHours(hourOffset, (index % 2) * 30, 0, 0);
+
     trades.push({
       id: uuidv4(),
       weekId,
       amount,
-      description: amount > 0 ? 'Profitable trade' : 'Loss trade',
-      timestamp
+      description: getTradeDescription(amount),
+      timestamp: tradeDate.getTime()
     });
   });
-  
+
   return trades;
 };
 
-// Function to add seed data to the app
 export const addSeedData = () => {
-  // This function will be called from the browser console
-  return {
-    week: seedWeek,
-    trades: createTradesForWeek(seedWeek.id)
-  };
-}; 
+  const allWeeks = seedWeeks.map((week, index) => {
+    const startTime = new Date(week.startDate).getTime();
+    return {
+      week: {
+        startDate: week.startDate,
+        endDate: week.endDate,
+        startValue: week.startValue
+      },
+      trades: createTradesForWeek(week.id, startTime, index)
+    };
+  });
+
+  return allWeeks;
+};

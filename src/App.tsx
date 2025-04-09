@@ -1,16 +1,18 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import Participants from './pages/Participants';
 import Weeks from './pages/Weeks';
-import WeekDetail from './pages/WeekDetail';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import ScrollToTop from './components/ScrollToTop';
 
 const App: React.FC = () => {
   return (
     <Router>
+      <ScrollToTop />
+      
       <div className="min-h-screen bg-tradeBg flex flex-col">
         <Header />
         
@@ -19,7 +21,8 @@ const App: React.FC = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/users" element={<Participants />} />
             <Route path="/weeks" element={<Weeks />} />
-            <Route path="/weeks/:weekId" element={<WeekDetail />} />
+            {/* Redirect old week detail URLs to the main weeks page */}
+            <Route path="/weeks/:weekId" element={<Navigate to="/weeks" replace />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
