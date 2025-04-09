@@ -1,13 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { Save, UploadCloud, AlertTriangle } from 'lucide-react';
+import { Save, UploadCloud, AlertTriangle, Trash2 } from 'lucide-react';
 import { useAppStore } from '../store';
 import Card, { CardHeader, CardContent } from '../components/ui/Card';
 import { downloadFile } from '../utils';
 
 const Settings: React.FC = () => {
-  const { exportData, importData } = useAppStore();
+  const { exportData, importData, resetData } = useAppStore();
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<boolean>(false);
+  const [clearSuccess, setClearSuccess] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleExportData = () => {
@@ -18,6 +19,18 @@ const Settings: React.FC = () => {
   const handleImportClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
+    }
+  };
+  
+  const handleClearData = () => {
+    if (window.confirm('Are you sure you want to clear all data? This will remove all weeks, trades, and settings. This action cannot be undone.')) {
+      resetData();
+      setClearSuccess(true);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setClearSuccess(false);
+      }, 3000);
     }
   };
   
@@ -131,6 +144,26 @@ const Settings: React.FC = () => {
                 {importSuccess && (
                   <div className="mt-3 p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
                     <p className="text-sm text-white/90">Data imported successfully!</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-2 pt-3 border-t border-tradeLight/10">
+                <h3 className="text-lg font-medium text-white">Clear All Data</h3>
+                <p className="text-sm text-white/70">
+                  Remove all data from the application and reset to a fresh state. This action cannot be undone.
+                </p>
+                <button
+                  className="btn-error flex items-center"
+                  onClick={handleClearData}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Clear Data
+                </button>
+                
+                {clearSuccess && (
+                  <div className="mt-3 p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
+                    <p className="text-sm text-white/90">All data has been cleared successfully!</p>
                   </div>
                 )}
               </div>

@@ -48,6 +48,7 @@ type AppStore = AppState & {
   getAllWeeklySummaries: () => WeeklySummary[];
   exportData: () => string;
   importData: (jsonData: string) => void;
+  resetData: () => void;
 };
 
 export const useAppStore = create<AppStore>()(
@@ -377,6 +378,8 @@ export const useAppStore = create<AppStore>()(
           console.error('Failed to import data:', error);
         }
       },
+      
+      resetData: () => set(initialState),
     }),
     {
       name: 'tradetrackr-storage',
